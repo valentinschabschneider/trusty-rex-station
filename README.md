@@ -1,42 +1,78 @@
-# create-svelte
+# Trusty Rex Station
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+WebUI for [Trusty Rex](https://github.com/valentinschabschneider/trusty-rex).
 
-## Creating a project
+## Configuration
 
-If you're seeing this, you've probably already done this step. Congrats!
+Required environment variables:
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+- API_BASE_PATH
+- API_KEY
 
-# create a new project in my-app
-npm create svelte@latest my-app
+## Authentication
+
+This project uses [SvelteKit Auth](https://authjs.dev/reference/sveltekit) and you can provide a `DynamicSvelteKitAuthConfig` ([docs reference](https://authjs.dev/reference/sveltekit#dynamicsveltekitauthconfig)) via the `DYNAMIC_AUTH_CONFIG` environment variable .
+
+### Example
+
+This configures two providers, one for credentials (username + password in this case) and one for Auth0.
+
+```env
+DYNAMIC_AUTH_CONFIG=async()=>{return{secret:'<secret>',trustHost:!0,providers:[(await import('@auth/core/providers/credentials')).default({name:'Credentials',credentials:{username:{label:'Username',type:'text'},password:{label:'Password',type:'password'}},async authorize(credentials,req){if(credentials.username==='jsmith'&&credentials.password==='password'){return{id:'1',name:'J Smith',email:'jsmith@example.com'}}else{return null}}}),{id:"auth0",name:"Auth0",wellKnown:"https://trusty-rex-station.eu.auth0.com/.well-known/openid-configuration",type:"oidc",clientId:"<clientId>",clientSecret:"<clientSecret>",issuer:"https://trusty-rex-station.eu.auth0.com"}]}}
 ```
+
+Readable version:
+
+```js
+async () => {
+	return {
+		secret: '<secret>',
+		trustHost: true,
+		providers: [
+			(await import('@auth/core/providers/credentials')).default({
+				name: 'Credentials',
+				credentials: {
+					username: {
+						label: 'Username',
+						type: 'text'
+					},
+					password: {
+						label: 'Password',
+						type: 'password'
+					}
+				},
+				async authorize(credentials, req) {
+					if (credentials.username === 'jsmith' && credentials.password === 'password') {
+						return {
+							id: '1',
+							name: 'J Smith',
+							email: 'jsmith@example.com'
+						};
+					} else {
+						return null;
+					}
+				}
+			}),
+			{
+				id: 'auth0',
+				name: 'Auth0',
+				wellKnown: 'https://trusty-rex-station.eu.auth0.com/.well-known/openid-configuration',
+				type: 'oidc',
+				clientId: '<clientId>',
+				clientSecret: '<clientSecret>',
+				issuer: 'https://trusty-rex-station.eu.auth0.com'
+			}
+		]
+	};
+};
+```
+
+Here an js minifier that worked for top level asyn for your convinience: https://www.minifier.org/
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Install dependencies with `yarn install`), start a development server:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+yarn run dev
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
----
-
-docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i http://host.docker.internal:8000/openapi.json -g typescript-fetch -o /local/out/fetch

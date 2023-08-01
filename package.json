@@ -33,6 +33,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@auth/core": "^0.10.0",
+		"@auth/sveltekit": "^0.3.6",
 		"@floating-ui/dom": "^1.4.5",
 		"@valentin.schabschneider/trusty-rex-typescript-fetch-client": "^0.3.2",
 		"@zerodevx/svelte-json-view": "^1.0.7",
